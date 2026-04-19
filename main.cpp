@@ -25,7 +25,15 @@ void printTitle(const string& title) {
 // ==============================
 void selectionSort(vector<int>& arr) {
     int n = arr.size();
-
+    for (int i = 0; i < n - 1; i++) {
+        int minIndex = i;
+        for (int j = i + 1; j < n; j++) {
+            if (arr[j] < arr[minIndex]) {
+                minIndex = j;
+            }
+        }
+        swap(arr[i], arr[minIndex]);
+    }
     // TODO:
     // 使用挑選排序法將 arr 由小到大排序
     //
@@ -40,7 +48,15 @@ void selectionSort(vector<int>& arr) {
 // ==============================
 void insertionSort(vector<int>& arr) {
     int n = arr.size();
-
+    for (int i = 1; i < n; i++) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+    }
     // TODO:
     // 使用插入排序法將 arr 由小到大排序
     //
@@ -56,7 +72,16 @@ void insertionSort(vector<int>& arr) {
 // ==============================
 void bubbleSort(vector<int>& arr) {
     int n = arr.size();
-
+    for (int i = 0; i < n - 1; i++) {
+        bool swapped = false;
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                swap(arr[j], arr[j + 1]);
+                swapped = true;
+            }
+        }
+        if (!swapped) break; // 提早結束優化
+    }
     // TODO:
     // 使用氣泡排序法將 arr 由小到大排序
     //
@@ -70,7 +95,16 @@ void bubbleSort(vector<int>& arr) {
 // ==============================
 void shellSort(vector<int>& arr) {
     int n = arr.size();
-
+    for (int gap = n / 2; gap > 0; gap /= 2) {
+        for (int i = gap; i < n; i++) {
+            int temp = arr[i];
+            int j;
+            for (j = i; j >= gap && arr[j - gap] > temp; j -= gap) {
+                arr[j] = arr[j - gap];
+            }
+            arr[j] = temp;
+        }
+    }
     // TODO:
     // 使用 Shell 排序法將 arr 由小到大排序
     //
@@ -84,6 +118,20 @@ void shellSort(vector<int>& arr) {
 // 5. Merge Sort
 // ==============================
 void merge(vector<int>& arr, int left, int mid, int right) {
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+    vector<int> L(n1), R(n2);
+
+    for (int i = 0; i < n1; i++) L[i] = arr[left + i];
+    for (int j = 0; j < n2; j++) R[j] = arr[mid + 1 + j];
+
+    int i = 0, j = 0, k = left;
+    while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) arr[k++] = L[i++];
+        else arr[k++] = R[j++];
+    }
+    while (i < n1) arr[k++] = L[i++];
+    while (j < n2) arr[k++] = R[j++];
     // TODO:
     // 合併 arr[left..mid] 與 arr[mid+1..right]
     //
@@ -94,6 +142,12 @@ void merge(vector<int>& arr, int left, int mid, int right) {
 }
 
 void mergeSort(vector<int>& arr, int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+        merge(arr, left, mid, right);
+    }
     // TODO:
     // 使用遞迴完成 merge sort
     //
@@ -109,6 +163,15 @@ void mergeSort(vector<int>& arr, int left, int right) {
 // 6. Quick Sort
 // ==============================
 int partitionArray(vector<int>& arr, int low, int high) {
+    int pivot = arr[high];
+    int i = low - 1;
+    for (int j = low; j < high; j++) {
+        if (arr[j] < pivot) {
+            i++;
+            swap(arr[i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
     // TODO:
     // 以 arr[high] 作為 pivot，完成 partition
     //
@@ -119,11 +182,16 @@ int partitionArray(vector<int>& arr, int low, int high) {
     // 4. 若 arr[j] < pivot，則交換到左側
     // 5. 最後將 pivot 放到正確位置
     // 6. 回傳 pivot 的索引
-    return -1; // 請修改
+    return i+1; // 請修改
 }
 
 void quickSort(vector<int>& arr, int low, int high) {
     // TODO:
+    if (low < high) {
+        int pi = partitionArray(arr, low, high);
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
     // 使用遞迴完成 quick sort
     //
     // 提示：
@@ -137,6 +205,24 @@ void quickSort(vector<int>& arr, int low, int high) {
 // 僅處理非負整數
 // ==============================
 void countingSortByDigit(vector<int>& arr, int exp) {
+    int n = arr.size();
+    vector<int> output(n);
+    int count[10] = {0};
+
+    for (int i = 0; i < n; i++)
+        count[(arr[i] / exp) % 10]++;
+
+    for (int i = 1; i < 10; i++)
+        count[i] += count[i - 1];
+
+    for (int i = n - 1; i >= 0; i--) {
+        int digit = (arr[i] / exp) % 10;
+        output[count[digit] - 1] = arr[i];
+        count[digit]--;
+    }
+
+    for (int i = 0; i < n; i++)
+        arr[i] = output[i];
     // TODO:
     // 依照指定位數 exp 進行 counting sort
     //
@@ -149,6 +235,11 @@ void countingSortByDigit(vector<int>& arr, int exp) {
 }
 
 void radixSort(vector<int>& arr) {
+    if (arr.empty()) return;
+    int maxVal = *max_element(arr.begin(), arr.end());
+    for (int exp = 1; maxVal / exp > 0; exp *= 10) {
+        countingSortByDigit(arr, exp);
+    }
     // TODO:
     // 使用 radix sort 將 arr 由小到大排序
     //
@@ -163,6 +254,19 @@ void radixSort(vector<int>& arr) {
 // 8. Heap Sort
 // ==============================
 void heapify(vector<int>& arr, int n, int i) {
+    int largest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+
+    if (left < n && arr[left] > arr[largest])
+        largest = left;
+    if (right < n && arr[right] > arr[largest])
+        largest = right;
+
+    if (largest != i) {
+        swap(arr[i], arr[largest]);
+        heapify(arr, n, largest);
+    }
     // TODO:
     // 維護以 i 為根的 max-heap
     //
@@ -175,7 +279,12 @@ void heapify(vector<int>& arr, int n, int i) {
 
 void heapSort(vector<int>& arr) {
     int n = arr.size();
-
+    for (int i = n / 2 - 1; i >= 0; i--)
+        heapify(arr, n, i);
+    for (int i = n - 1; i > 0; i--) {
+        swap(arr[0], arr[i]);
+        heapify(arr, i, 0);
+    }
     // TODO:
     // 使用 heap sort 將 arr 由小到大排序
     //
